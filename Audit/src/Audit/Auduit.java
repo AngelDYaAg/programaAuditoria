@@ -22,124 +22,190 @@ public class Auduit {
 
         try (Connection connection = DriverManager.getConnection(connectionUrl);
                 Statement statement = connection.createStatement();) {
-        	
-        	
-        	System.out.println("***************************ANOMALIAS DE FOREIGN KEY:*************************************************");
-        	getFks(connection);
-        	System.out.println("***************************ANOMALIAS EN TABLAS QUE NO EXISTE UNA RELACION DE FK:*************************************************");
-        	TestTwo(connection);
-        	
-        	
-        
+        	System.out.println("\n***************************Tablas:*************************************************");
+        	getTablas(connection);
+        	System.out.println("\n***************************Primary Key:*************************************************");
+        	getPKs(connection);
+        	System.out.println("\n***************************No Primary Key:*************************************************");
+        	getNoFKs(connection);
+        	System.out.println("\n***************************Porcentaje Primary Key:*************************************************");
+        	getPorcentajePKs(connection);
+        	System.out.println("\n***************************Foreign Key:*************************************************");
+        	getFKs(connection);
+        	System.out.println("\n***************************No Foreign Key:*************************************************");
+        	getNoFKs(connection);
+        	System.out.println("\n***************************Triggers:*************************************************");
+        	getTriggers(connection);
+        	System.out.println("\n***************************constraints:*************************************************");
+        	getConstraints(connection);
         }
         catch (SQLException e) {
             e.printStackTrace();
         }
     }
 	
-	 public static void getTriggerAnomalies(String dad,String column, String child,Connection connection) throws SQLException{
-		 
-		 getNotInfk(dad,column,child,connection); 
-		 
-	 }
-	 public static void getTriggerEmtpyAnomalies(String dad ,String column ,String child, Connection connection) throws SQLException{
-		 
-		 getNullas(dad,column,connection);
-	 }
 	
-	 public static void consultarIntegReferencial(Connection connection) throws SQLException{
-//	        String query = "select schema_name(tab.schema_id) + '.' + tab.name as [table]," +
-//	"col.column_id," +
-//	"col.name as column_name," +
-//	"fk.object_id as rel," +
-//	"schema_name(pk_tab.schema_id) + '.' + pk_tab.name as primary_table," +
-//	"pk_col.name as pk_column_name," +
-//	"fk_cols.constraint_column_id as no," +
-//	"fk.name as fk_constraint_name," +
-//	"fk.is_disabled as deshabilitado" +
-//	"from sys.tables tab" +
-//	"inner join sys.columns col " +
-//	"on col.object_id = tab.object_id" +
-//	"left outer join sys.foreign_key_columns fk_cols" +
-//	"on fk_cols.parent_object_id = tab.object_id" +
-//	"and fk_cols.parent_column_id = col.column_id" +
-//	"left outer join sys.foreign_keys fk" +
-//	"on fk.object_id = fk_cols.constraint_object_id" +
-//	"left outer join sys.tables pk_tab" +
-//	"on pk_tab.object_id = fk_cols.referenced_object_id" +
-//	"left outer join sys.columns pk_col" +
-//	"on pk_col.column_id = fk_cols.referenced_column_id" +
-//	"and pk_col.object_id = fk_cols.referenced_object_id" +
-//	"where fk.object_id is not null" +
-//	"order by schema_name(tab.schema_id) + '.' + tab.name," +
-//	"col.column_id";
-	        //rs = stm.executeQuery("SELECT * FROM [dbo].[sales");
-		    String query = "SELECT * FROM [dbo].[titles]";
-	        Statement stm = connection.createStatement();
-	        ResultSet rs = stm.executeQuery(query);
-	        while(rs.next())
-	        {
-	            System.out.println("Tabla: "+rs.getString("table"));
-	            System.out.println("Columna" +rs.getString("column_name"));
-	            System.out.println("FK constraint: "+rs.getString("fk_constraint_name"));
-	            System.out.println("Tabla padre: "+rs.getString("primary_table"));
-	            if(rs.getBoolean("deshabilitado")){
-	                System.out.println("Constraint no chequeado: "+rs.getString("res"));
-	            }else{
-	                System.out.println("OK");
-	            }
-	            
-	        }
-	        generarLog(query, connection);
-	    }
-	    
-	    public static void generarLog(String query, Connection conn) throws SQLException{
-	        //sp_configure 'show advanced options', 1
-	        //CallableStatement cst = conn.prepareCall("{call sp_configure 'show advanced options', 1}");
-	        CallableStatement cst = conn.prepareCall("{call sp_configure (?,?)}");
-	        cst.setString(1, "show advanced options");
-	        cst.setInt(2, 1);
-	        cst.execute();
-	        
-	        CallableStatement cst2 = conn.prepareCall("{call logIntegRefer }");
-	        
-	        cst2.execute();
-	    }
-	
-	
-	public static void getFks(Connection conn) throws SQLException {
+	public static void getTablas(Connection conn) throws SQLException {
 
 		Statement statement = conn.createStatement();
-		 String selectFks = "SELECT  obj.name AS FK_NAME,\r\n" + 
-	         		"    sch.name AS [schema_name],\r\n" + 
-	         		"    tab1.name AS [table],\r\n" + 
-	         		"    col1.name AS [column],\r\n" + 
-	         		"    tab2.name AS [referenced_table],\r\n" + 
-	         		"    col2.name AS [referenced_column]\r\n" + 
-	         		"FROM sys.foreign_key_columns fkc\r\n" + 
-	         		"INNER JOIN sys.objects obj\r\n" + 
-	         		"    ON obj.object_id = fkc.constraint_object_id\r\n" + 
-	         		"INNER JOIN sys.tables tab1\r\n" + 
-	         		"    ON tab1.object_id = fkc.parent_object_id\r\n" + 
-	         		"INNER JOIN sys.schemas sch\r\n" + 
-	         		"    ON tab1.schema_id = sch.schema_id\r\n" + 
-	         		"INNER JOIN sys.columns col1\r\n" + 
-	         		"    ON col1.column_id = parent_column_id AND col1.object_id = tab1.object_id\r\n" + 
-	         		"INNER JOIN sys.tables tab2\r\n" + 
-	         		"    ON tab2.object_id = fkc.referenced_object_id\r\n" + 
-	         		"INNER JOIN sys.columns col2\r\n" + 
-	         		"    ON col2.column_id = referenced_column_id AND col2.object_id = tab2.object_id\r\n" + 
-	         		"";
-		 ResultSet resultSet = statement.executeQuery(selectFks);
-		 String dad;
-		 String column;
-		 String child;
+		 String selectTablas = "select schema_name(t.schema_id) as schema_name,\n" + 
+		 		"       t.name as table_name\n" + 
+		 		"from sys.tables t\n" + 
+		 		"order by schema_name,\n" + 
+		 		"         table_name;";
+		 ResultSet resultSet = statement.executeQuery(selectTablas);
+		 String schema_name;
+		 String table_name;
 		 
 		 while (resultSet.next()) {
-             dad = resultSet.getString("referenced_table");
-         	 column = resultSet.getString("column");
-         	 child = resultSet.getString("table");
-         	getNotInfk(dad,column,child,conn);
+			 schema_name = resultSet.getString("schema_name");
+			 table_name = resultSet.getString("table_name");
+			 System.out.println("schema_name"+": "+schema_name+" | "+"table_name"+": "+table_name);
+         	
+         }
+		
+		
+	}
+	
+	public static void getPKs(Connection conn) throws SQLException {
+
+		Statement statement = conn.createStatement();
+		 String selectTablas = "select schema_name(tab.schema_id) as [schema_name], \n" + 
+		 		"    tab.[name] as table_name, \n" + 
+		 		"    pk.[name] as pk_name,\n" + 
+		 		"    substring(column_names, 1, len(column_names)-1) as [columns]\n" + 
+		 		"from sys.tables tab\n" + 
+		 		"    left outer join sys.indexes pk\n" + 
+		 		"        on tab.object_id = pk.object_id \n" + 
+		 		"        and pk.is_primary_key = 1\n" + 
+		 		"   cross apply (select col.[name] + ', '\n" + 
+		 		"                    from sys.index_columns ic\n" + 
+		 		"                        inner join sys.columns col\n" + 
+		 		"                            on ic.object_id = col.object_id\n" + 
+		 		"                            and ic.column_id = col.column_id\n" + 
+		 		"                    where ic.object_id = tab.object_id\n" + 
+		 		"                        and ic.index_id = pk.index_id\n" + 
+		 		"                            order by col.column_id\n" + 
+		 		"                            for xml path ('') ) D (column_names)\n" + 
+		 		"order by schema_name(tab.schema_id),\n" + 
+		 		"    tab.[name]";
+		 ResultSet resultSet = statement.executeQuery(selectTablas);
+		 String schema_name;
+		 String table_name;
+		 String pk_name;
+		 String columns;
+		 
+		 while (resultSet.next()) {
+			 schema_name = resultSet.getString("schema_name");
+			 table_name = resultSet.getString("table_name");
+			 pk_name = resultSet.getString("pk_name");
+			 columns = resultSet.getString("columns");
+			 System.out.println("schema_name"+": "+schema_name+" | "+"table_name"+": "+table_name+"\t | "+"pk_name"+": "+pk_name+"\t | "+"columns"+": "+columns);
+         	
+         }
+		
+		
+	}
+	
+	public static void getNoPKs(Connection conn) throws SQLException {
+
+		Statement statement = conn.createStatement();
+		 String selectTablas = "select schema_name(tab.schema_id) as [schema_name], \n" + 
+		 		"    tab.[name] as table_name\n" + 
+		 		"from sys.tables tab\n" + 
+		 		"    left outer join sys.indexes pk\n" + 
+		 		"        on tab.object_id = pk.object_id \n" + 
+		 		"        and pk.is_primary_key = 1\n" + 
+		 		"where pk.object_id is null\n" + 
+		 		"order by schema_name(tab.schema_id),\n" + 
+		 		"    tab.[name]";
+		 ResultSet resultSet = statement.executeQuery(selectTablas);
+		 String schema_name;
+		 String table_name;
+		 
+		 while (resultSet.next()) {
+			 schema_name = resultSet.getString("schema_name");
+			 table_name = resultSet.getString("table_name");
+			 System.out.println("schema_name"+": "+schema_name+" | "+"table_name"+": "+table_name);
+         	
+         }
+		
+		
+	}
+	
+	public static void getPorcentajePKs(Connection conn) throws SQLException {
+
+		Statement statement = conn.createStatement();
+		 String selectTablas = "select \n" + 
+		 		"    all_tabs.[tables] as all_tables,\n" + 
+		 		"    no_pk.[tables] as no_pk_tables,\n" + 
+		 		"    cast(cast(100.0 * no_pk.[tables] / \n" + 
+		 		"    all_tabs.[tables] as decimal(36, 1)) as varchar) + '%' as no_pk_percent\n" + 
+		 		"from\n" + 
+		 		"    (select count(*) as [tables]\n" + 
+		 		"    from sys.tables tab\n" + 
+		 		"        left outer join sys.indexes pk\n" + 
+		 		"            on tab.object_id = pk.object_id \n" + 
+		 		"            and pk.is_primary_key = 1\n" + 
+		 		"    where pk.object_id is null) as no_pk\n" + 
+		 		"inner join \n" + 
+		 		"    (select count(*) as [tables]\n" + 
+		 		"    from sys.tables) as all_tabs\n" + 
+		 		"on 1 = 1";
+		 ResultSet resultSet = statement.executeQuery(selectTablas);
+		 String all_tables;
+		 String no_pk_tables;
+		 String no_pk_percent;
+		 
+		 while (resultSet.next()) {
+			 all_tables = resultSet.getString("all_tables");
+			 no_pk_tables = resultSet.getString("no_pk_tables");
+			 no_pk_percent = resultSet.getString("no_pk_percent");
+			 System.out.println("all_tables"+": "+all_tables+" | "+"no_pk_tables"+": "+no_pk_tables+" | "+"no_pk_percent"+": "+no_pk_percent);
+         	
+         }
+		
+		
+	}
+	
+	public static void getFKs(Connection conn) throws SQLException {
+
+		Statement statement = conn.createStatement();
+		 String selectTablas = "SELECT FK.name, PFK.name AS parentTable, RFK.name AS referencedTable\n" + 
+		 		"FROM sys.foreign_keys FK\n" + 
+		 		"INNER JOIN sys.objects PFK ON PFK.object_id = FK.parent_object_id\n" + 
+		 		"INNER JOIN sys.objects RFK ON RFK.object_id = FK.referenced_object_id";
+		 ResultSet resultSet = statement.executeQuery(selectTablas);
+		 String name;
+		 String parentTable;
+		 String referencedTable;
+		 
+		 while (resultSet.next()) {
+			 name = resultSet.getString("name");
+			 parentTable = resultSet.getString("parentTable");
+			 referencedTable = resultSet.getString("referencedTable");
+			 System.out.println("name"+": "+name+" | "+"parentTable"+": "+parentTable+"\t | "+"referencedTable"+": "+referencedTable);
+         	
+         }
+		
+		
+	}
+	
+	
+	public static void getConstraints(Connection conn) throws SQLException {
+
+		Statement statement = conn.createStatement();
+		 String selectTablas = "DBCC CHECKCONSTRAINTS WITH ALL_CONSTRAINTS";
+		 ResultSet resultSet = statement.executeQuery(selectTablas);
+		 String Table;
+		 String Constraint;
+		 String Where;
+		 
+		 while (resultSet.next()) {
+			 Table = resultSet.getString("Table");
+			 Constraint = resultSet.getString("Constraint");
+			 Where = resultSet.getString("Where");
+			 System.out.println("Table"+": "+Table+" | "+"Constraint"+": "+Constraint+"\t | "+"Where"+": "+Where);
          	
          }
 		
@@ -148,335 +214,81 @@ public class Auduit {
 	
 	
 	
-	public static void getNotInfk(String dad, String column, String child, Connection conn) throws SQLException {
-		
-	Statement statement = conn.createStatement();
-	
-	String Query = "SELECT  child.*\r\n" + 
-			"FROM    "+child+" child\r\n" + 
-			"LEFT JOIN\r\n" + 
-			dad+" padre\r\n" + 
-			"ON      padre."+column+" = child."+column+"\r\n" + 
-			"WHERE   padre."+column+" IS NULL";
+	public static void getNoFKs(Connection conn) throws SQLException {
 
-	ResultSet resultSet = statement.executeQuery(Query);
-	ResultSetMetaData rsmd = resultSet.getMetaData();
-	int columnCount = rsmd.getColumnCount();
-	
-
-	 while (resultSet.next()) {
-		 System.out.println("\n\nAnomaila en la relación entre "+child+" y "+dad+" en el registro con Datos:\n");
-		 for (int i = 1; i <= columnCount; i++ ) {
-			  String name = rsmd.getColumnName(i);
-			  System.out.println(name+":     "+resultSet.getString(name));
-			  
-			}
-		 System.out.println("No encontrado en el padre: "+resultSet.getString(column));
-       
-    }
-	}
-	
-	
-	public static void getNullas(String table, String column, Connection conn) throws SQLException{
-		
-		
 		Statement statement = conn.createStatement();
-		String query = "select * from "+table+" where "+column+" = Null or "+column+" = ''";
-		
-		
-		ResultSet resultSet = statement.executeQuery(query);
-		ResultSetMetaData rsmd = resultSet.getMetaData();
-		int columnCount = rsmd.getColumnCount();
-		
-		
+		 String selectTablas = "select schema_name(fk_tab.schema_id) as schema_name,\n" + 
+		 		"    fk_tab.name as table_name,\n" + 
+		 		"    '>- no FKs' foreign_keys\n" + 
+		 		"from sys.tables fk_tab\n" + 
+		 		"    left outer join sys.foreign_keys fk\n" + 
+		 		"        on fk_tab.object_id = fk.parent_object_id\n" + 
+		 		"where fk.object_id is null\n" + 
+		 		"order by schema_name(fk_tab.schema_id),\n" + 
+		 		"    fk_tab.name";
+		 ResultSet resultSet = statement.executeQuery(selectTablas);
+		 String schema_name;
+		 String table_name;
+		 String foreign_keys;
+		 
 		 while (resultSet.next()) {
-			 System.out.println("\n\nAnomaila en los Triggers en la tabla "+table+":\n");
-			 for (int i = 1; i <= columnCount; i++ ) {
-				  String name = rsmd.getColumnName(i);
-				  System.out.println(name+":     "+resultSet.getString(name));
-				  
-				}
-			
-			
-	       
-	    }
-		
+			 schema_name = resultSet.getString("schema_name");
+			 table_name = resultSet.getString("table_name");
+			 foreign_keys = resultSet.getString("foreign_keys");
+			 System.out.println("schema_name"+": "+schema_name+" | "+"table_name"+": "+table_name+"\t | "+"foreign_keys"+": "+foreign_keys);
+         	
+         }
 		
 		
 	}
 	
-	public static void Test(Connection conn) throws SQLException 
-	{
-		Statement statement = conn.createStatement();
-		Statement sizeS = conn.createStatement();
-		Statement pksS = conn.createStatement();
-		//String query = "SELECT \r\n" + 
-		//		" t.name AS TableName,\r\n" + 
-		//		" tr.name AS TriggerName  \r\n" + 
-		//		"FROM sys.triggers tr\r\n" + 
-			//	"INNER JOIN sys.tables t ON t.object_id = tr.parent_id";
-		String query ="select [name],[OBJECT_ID] from sys.tables\r\n" + 
-				"";
-		ResultSet size = sizeS.executeQuery(query);
-		ResultSet resultSetHijos = statement.executeQuery(query);
-		
-		
-		int sizeInt =0;
-		 while (size.next()) {
-				 sizeInt++;
-		    }
-		 ArrayList<String> arrayHijos = new ArrayList<String>();
-		while(resultSetHijos.next()) {
-			 arrayHijos.add(resultSetHijos.getString(1));
-		}
-		
-	//	System.out.println("el array hijo es :"+arrayHijos.toString());
-		//**************************************************************************
-		String pksQuery = "SELECT  OBJECT_NAME(ic.OBJECT_ID) AS TableName,\r\n" + 
-				"        COL_NAME(ic.OBJECT_ID,ic.column_id) AS ColumnName\r\n" + 
-				"FROM    sys.indexes AS i INNER JOIN \r\n" + 
-				"        sys.index_columns AS ic ON  i.OBJECT_ID = ic.OBJECT_ID\r\n" + 
-				"                                AND i.index_id = ic.index_id\r\n" + 
-				"WHERE   i.is_primary_key = 1";
-		
-		ResultSet pksResult = pksS.executeQuery(pksQuery);
-		
-		
-		 ArrayList<ArrayList<String>> papaPk = new ArrayList<ArrayList<String>>();
-		 while(pksResult.next()) {
-			 ArrayList<String> temp = new ArrayList<String>();
-			 temp.add(pksResult.getString(1));
-			 temp.add(pksResult.getString(2));
-		
-			
-			 papaPk.add(temp);
-			 
-			 
-		}
-		// System.out.println(papaPk.toString());
-		 
-		 
-		 //**************************************************************************
-		 ArrayList<ArrayList<String>> hijoPadreRelated = new ArrayList<ArrayList<String>>();
-		 
-		 
-		 
-		 
-		 for(int g = 0 ; g<papaPk.size();g++) {
-			 int veces = 0;
-			 for(int h = 0; h<papaPk.size();h++) {
-				 String aux = papaPk.get(g).get(0);
-				
-				 if(papaPk.get(g).get(0).equals(papaPk.get(h).get(0))) {
-					 veces++;
-				 }
-				 
-			 }
-			 if(veces==1) {
-				 ArrayList<String> temp = new ArrayList<String>();
-				 temp.add(papaPk.get(g).get(0));
-				 temp.add(papaPk.get(g).get(1));
-				 hijoPadreRelated.add(temp);
-			 }
-			 
-			 
-		 }
-		 
-		 System.out.println("EL NUEVO EEEESSSSSSSSSSSS:"+hijoPadreRelated.toString());
-		 
-		 
-		 //**************************************************************************************
 	
-		 System.out.println("El SIZE = "+sizeInt);
-		 
-		for(int i = 0; i<sizeInt;i++) {
-			Statement statementAux = conn.createStatement();
-			String queryAux = "Select top 1 * from "+arrayHijos.get(i);
-			System.out.println("Select top 1 * from "+arrayHijos.get(i));
-			ResultSet resultSetAux = statementAux.executeQuery(queryAux);
-			ResultSetMetaData rsmdAux = resultSetAux.getMetaData();
-			int columnCount = rsmdAux.getColumnCount();
-			//System.out.println("Columm"+columnCount);
-			 while (resultSetAux.next()) {
-		
-				 for (int j = 1; j <= columnCount; j++ ) {
-					  String name = rsmdAux.getColumnName(j);
-				//	  System.out.println(name);
-					
-					  for(int k=0; k<hijoPadreRelated.size();k++) {
-						 if(arrayHijos.get(i).equals(hijoPadreRelated.get(k).get(0))==false) {
-							 if(name.equals(hijoPadreRelated.get(k).get(1))) {
-								  System.out.println("Posible Relación: "+arrayHijos.get(i)+" y "+papaPk.get(k).get(0)+" A TRAVES DE "+papaPk.get(k).get(1));
-								  
-								  getTriggerAnomalies(papaPk.get(k).get(0),papaPk.get(k).get(1),arrayHijos.get(i),conn);
-								  getTriggerEmtpyAnomalies(papaPk.get(k).get(0),papaPk.get(k).get(1),arrayHijos.get(i),conn);
-							
-								  
-							  }
-							 
-						 }
-						  
-						  
-						  
-					  }
-					  
-					  
-					  
-					  
-					  
-					}
-				
-				
-		       
-		    }
-			
-			
-		}
-		 
-		
-		
-	
-	}
-	
-	
-	public static boolean ExisteEnFk(String dad, String child,Connection conn) throws SQLException{
-		Statement statement = conn.createStatement();
-		Statement sizeS = conn.createStatement();
-		String query = "select * from(\r\n" + 
-				"SELECT  obj.name AS FK_NAME,\r\n" + 
-				"    sch.name AS [schema_name],\r\n" + 
-				"    tab1.name AS [table],\r\n" + 
-				"    col1.name AS [column],\r\n" + 
-				"    tab2.name AS [referenced_table],\r\n" + 
-				"    col2.name AS [referenced_column]\r\n" + 
-				"FROM sys.foreign_key_columns fkc\r\n" + 
-				"INNER JOIN sys.objects obj\r\n" + 
-				"    ON obj.object_id = fkc.constraint_object_id\r\n" + 
-				"INNER JOIN sys.tables tab1\r\n" + 
-				"    ON tab1.object_id = fkc.parent_object_id\r\n" + 
-				"INNER JOIN sys.schemas sch\r\n" + 
-				"    ON tab1.schema_id = sch.schema_id\r\n" + 
-				"INNER JOIN sys.columns col1\r\n" + 
-				"    ON col1.column_id = parent_column_id AND col1.object_id = tab1.object_id\r\n" + 
-				"INNER JOIN sys.tables tab2\r\n" + 
-				"    ON tab2.object_id = fkc.referenced_object_id\r\n" + 
-				"INNER JOIN sys.columns col2\r\n" + 
-				"    ON col2.column_id = referenced_column_id AND col2.object_id = tab2.object_id\r\n" + 
-				"	)  JH\r\n" + 
-				"	where JH.[table] = '"+child+"' and JH.[referenced_table] = '"+dad+"'";
-		
-		ResultSet size = sizeS.executeQuery(query);
-		ResultSet resultSetHijos = statement.executeQuery(query);
-		int sizeInt =0;
-		 while (size.next()) {
-				 sizeInt++;
-		    }
-		 if(sizeInt==0) {
-			 return false;
-		 }else {
-			 return true;
-		 }
-		
-	}
-	
-	public static void TestTwo(Connection conn) throws SQLException 
-	{
-		Statement statement = conn.createStatement();
-		Statement sizeS = conn.createStatement();
-		Statement pksS = conn.createStatement();
-		String query = "SELECT \r\n" + 
-				" t.name AS TableName,\r\n" + 
-				" tr.name AS TriggerName  \r\n" + 
-				"FROM sys.triggers tr\r\n" + 
-				"INNER JOIN sys.tables t ON t.object_id = tr.parent_id";
-		//String query ="select [name],[OBJECT_ID] from sys.tables\r\n" + 
-				//"";
-		ResultSet size = sizeS.executeQuery(query);
-		ResultSet resultSetHijos = statement.executeQuery(query);
-		
-		
-		int sizeInt =0;
-		 while (size.next()) {
-				 sizeInt++;
-		    }
-		 ArrayList<String> arrayHijos = new ArrayList<String>();
-		while(resultSetHijos.next()) {
-			 arrayHijos.add(resultSetHijos.getString(1));
-		}
-		
-	//	System.out.println("el array hijo es :"+arrayHijos.toString());
-		//**************************************************************************
-		String pksQuery = "SELECT  OBJECT_NAME(ic.OBJECT_ID) AS TableName,\r\n" + 
-				"        COL_NAME(ic.OBJECT_ID,ic.column_id) AS ColumnName\r\n" + 
-				"FROM    sys.indexes AS i INNER JOIN \r\n" + 
-				"        sys.index_columns AS ic ON  i.OBJECT_ID = ic.OBJECT_ID\r\n" + 
-				"                                AND i.index_id = ic.index_id\r\n" + 
-				"WHERE   i.is_primary_key = 1";
-		
-		ResultSet pksResult = pksS.executeQuery(pksQuery);
-		
-		
-		 ArrayList<ArrayList<String>> papaPk = new ArrayList<ArrayList<String>>();
-		 while(pksResult.next()) {
-			 ArrayList<String> temp = new ArrayList<String>();
-			 temp.add(pksResult.getString(1));
-			 temp.add(pksResult.getString(2));
-		
-			
-			 papaPk.add(temp);
-			 
-			 
-		}
-		// System.out.println(papaPk.toString());
-		 
-		 
+	public static void getTriggers(Connection conn) throws SQLException {
 
+		Statement statement = conn.createStatement();
+		 String selectTablas = "select schema_name(tab.schema_id) + '.' + tab.name as [table],\n" + 
+		 		"    trig.name as trigger_name,\n" + 
+		 		"    case when is_instead_of_trigger = 1 then 'Instead of'\n" + 
+		 		"        else 'After' end as [activation],\n" + 
+		 		"    (case when objectproperty(trig.object_id, 'ExecIsUpdateTrigger') = 1 \n" + 
+		 		"            then 'Update ' else '' end\n" + 
+		 		"    + case when objectproperty(trig.object_id, 'ExecIsDeleteTrigger') = 1 \n" + 
+		 		"            then 'Delete ' else '' end\n" + 
+		 		"    + case when objectproperty(trig.object_id, 'ExecIsInsertTrigger') = 1 \n" + 
+		 		"            then 'Insert ' else '' end\n" + 
+		 		"    ) as [event],\n" + 
+		 		"    case when trig.[type] = 'TA' then 'Assembly (CLR) trigger'\n" + 
+		 		"        when trig.[type] = 'TR' then 'SQL trigger' \n" + 
+		 		"        else '' end as [type],\n" + 
+		 		"    case when is_disabled = 1 then 'Disabled'\n" + 
+		 		"        else 'Active' end as [status],\n" + 
+		 		"    object_definition(trig.object_id) as [definition]\n" + 
+		 		"from sys.triggers trig\n" + 
+		 		"    inner join sys.objects tab\n" + 
+		 		"        on trig.parent_id = tab.object_id\n" + 
+		 		"order by schema_name(tab.schema_id) + '.' + tab.name, trig.name;";
+		 ResultSet resultSet = statement.executeQuery(selectTablas);
+		 String table;
+		 String trigger_name;
+		 String activation;
+		 String event;
+		 String type;
+		 String status;
+		 String definition;
 		 
-		 ArrayList<ArrayList<String>> triggerTables = new ArrayList<ArrayList<String>>();
-		 //**************************************************************************************
-	
-		 System.out.println("El SIZE = "+sizeInt);
-		 
-		for(int i = 0; i<sizeInt;i++) {
-			Statement statementAux = conn.createStatement();
-			String queryAux = "Select top 1 * from "+arrayHijos.get(i);
-			System.out.println("\n\nTABLA"+arrayHijos.get(i));
-			ResultSet resultSetAux = statementAux.executeQuery(queryAux);
-			ResultSetMetaData rsmdAux = resultSetAux.getMetaData();
-			int columnCount = rsmdAux.getColumnCount();
-			//System.out.println("Columm"+columnCount);
-			 while (resultSetAux.next()) {
+		 while (resultSet.next()) {
+			 table = resultSet.getString("table");
+			 trigger_name = resultSet.getString("trigger_name");
+			 activation = resultSet.getString("activation");
+			 event = resultSet.getString("event");
+			 type = resultSet.getString("type");
+			 status = resultSet.getString("status");
+			 definition = resultSet.getString("definition");
+			 System.out.println("table"+": "+table+" | "+"trigger_name"+": "+trigger_name+"\t | "+"activation"+": "+activation+"\t | "+"event"+": "+event+"\t | "+"type"+": "+type+"\t | "+"status"+": "+status+"\t | "+"definition"+": "+definition);
+         	
+         }
 		
-				 for (int j = 1; j <= columnCount; j++ ) {
-					  String name = rsmdAux.getColumnName(j);
-				//	  System.out.println(name);
-					
-					  for(int k=0; k<papaPk.size();k++) {
-						 if(arrayHijos.get(i).equals(papaPk.get(k).get(0))==false) {
-							 if(name.equals(papaPk.get(k).get(1))) {
-								  System.out.print("Posible Relación: "+arrayHijos.get(i)+" y "+papaPk.get(k).get(0)+" A TRAVES DE "+papaPk.get(k).get(1));
-								  if(ExisteEnFk(papaPk.get(k).get(0),arrayHijos.get(i),conn)){
-									  System.out.print("  (EXISTE UNA RELACIÓN FK)");
-								  }
-								  
-								  
-								  getTriggerAnomalies(papaPk.get(k).get(0),papaPk.get(k).get(1),arrayHijos.get(i),conn);
-								  
-								  
-								  getTriggerEmtpyAnomalies(papaPk.get(k).get(0),papaPk.get(k).get(1),arrayHijos.get(i),conn);
-							  }
-							 
-						 }  
-						  
-					  }
-					  
-					}
-		    }
-			
-		}
-		 	
+		
 	}
 	
-	}
-
-
+}	
