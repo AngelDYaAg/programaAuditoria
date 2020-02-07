@@ -62,7 +62,7 @@ public class ResultadosAnalisis extends JFrame {
         modelo.addColumn("Nombre Esquema");
         modelo.addColumn("Nombre Tabla");
         tbNoPK.setModel(modelo);
-
+        
         modelo = conexion.getNoPKs(conexion.getCnx(), modelo);
 
         tbNoPK.setModel(modelo);
