@@ -30,6 +30,7 @@ public class ResultadosAnalisis extends JFrame {
         // TRIGGERS
         resultadoTriggersBD();
         // CONSTRAIN
+        resultadoCheckBD();
     }
 
     void resultadoTablasBD() {
@@ -128,9 +129,7 @@ public class ResultadosAnalisis extends JFrame {
         modelo.addColumn("Constrain");
         modelo.addColumn("Where");
         tbRestricciones.setModel(modelo);
-        
         modelo = conexion.getConstraints(conexion.getCnx(), modelo);
-
         tbRestricciones.setModel(modelo);
     }
 
@@ -576,6 +575,7 @@ public class ResultadosAnalisis extends JFrame {
 
     private void btnSalir5ActionPerformed(java.awt.event.ActionEvent evt) {                                          
         // TODO add your handling code here:
+    	System.exit(0);
     }                                         
 
     private void btnGenerarReporte5ActionPerformed(java.awt.event.ActionEvent evt) {                                                   
