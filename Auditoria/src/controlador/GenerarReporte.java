@@ -55,9 +55,10 @@ public class GenerarReporte {
         }
     }
 
-    public String getTablas(Connection conn, String informe) throws SQLException {
-
-        Statement statement = conn.createStatement();
+    public String getTablas(Connection conn, String informe){
+        Statement statement;
+		try {
+			statement = conn.createStatement();
         String selectTablas = "select schema_name(t.schema_id) as schema_name,\n"
                 + "       t.name as table_name\n"
                 + "from sys.tables t\n"
@@ -73,12 +74,19 @@ public class GenerarReporte {
             informe = informe + "\nschema_name" + ": " + schema_name + " | " + "table_name" + ": " + table_name + "\n";
 
         }
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			informe = informe + "/nNo existen resultados";
+		}
         return informe;
     }
 
-    public String getPKs(Connection conn, String informe) throws SQLException {
+    public String getPKs(Connection conn, String informe) {
 
-        Statement statement = conn.createStatement();
+        Statement statement;
+		try {
+			statement = conn.createStatement();
+		
         String selectTablas = "select schema_name(tab.schema_id) as [schema_name], \n"
                 + "    tab.[name] as table_name, \n"
                 + "    pk.[name] as pk_name,\n"
@@ -112,12 +120,18 @@ public class GenerarReporte {
             informe = informe + "\nschema_name" + ": " + schema_name + " | " + "table_name" + ": " + table_name + "\t | " + "pk_name" + ": " + pk_name + "\t | " + "columns" + ": " + columns + "\n";
 
         }
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			informe = informe + "/nNo existen resultados";
+		}
         return informe;
     }
 
-    public String getNoPKs(Connection conn, String informe) throws SQLException {
+    public String getNoPKs(Connection conn, String informe){
 
-        Statement statement = conn.createStatement();
+        Statement statement;
+		try {
+			statement = conn.createStatement();
         String selectTablas = "select schema_name(tab.schema_id) as [schema_name], \n"
                 + "    tab.[name] as table_name\n"
                 + "from sys.tables tab\n"
@@ -137,12 +151,18 @@ public class GenerarReporte {
             informe = informe + "\nschema_name" + ": " + schema_name + " | " + "table_name" + ": " + table_name + "\n";
 
         }
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			informe = informe + "/nNo existen resultados";
+		}
         return informe;
     }
 
-    public String getPorcentajePKs(Connection conn, String informe) throws SQLException {
+    public String getPorcentajePKs(Connection conn, String informe) {
 
-        Statement statement = conn.createStatement();
+        Statement statement;
+		try {
+			statement = conn.createStatement();
         String selectTablas = "select \n"
                 + "    all_tabs.[tables] as all_tables,\n"
                 + "    no_pk.[tables] as no_pk_tables,\n"
@@ -171,12 +191,18 @@ public class GenerarReporte {
             informe = informe + "\nall_tables" + ": " + all_tables + " | " + "no_pk_tables" + ": " + no_pk_tables + " | " + "no_pk_percent" + ": " + no_pk_percent + "\n";
 
         }
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			informe = informe + "/nNo existen resultados";
+		}
        return informe;
     }
 
-    public String getFKs(Connection conn, String informe) throws SQLException {
+    public String getFKs(Connection conn, String informe) {
 
-        Statement statement = conn.createStatement();
+        Statement statement;
+		try {
+			statement = conn.createStatement();
         String selectTablas = "SELECT FK.name, PFK.name AS parentTable, RFK.name AS referencedTable\n"
                 + "FROM sys.foreign_keys FK\n"
                 + "INNER JOIN sys.objects PFK ON PFK.object_id = FK.parent_object_id\n"
@@ -193,6 +219,10 @@ public class GenerarReporte {
             informe = informe + "\nname" + ": " + name + " | " + "parentTable" + ": " + parentTable + "\t | " + "referencedTable" + ": " + referencedTable + "\n";
 
         }
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			informe = informe + "/nNo existen resultados";
+		}
         return informe;
     }
 
@@ -224,9 +254,11 @@ public class GenerarReporte {
         return informe;
     }
 
-    public String getNoFKs(Connection conn, String informe) throws SQLException {
+    public String getNoFKs(Connection conn, String informe) {
 
-        Statement statement = conn.createStatement();
+        Statement statement;
+		try {
+			statement = conn.createStatement();
         String selectTablas = "select schema_name(fk_tab.schema_id) as schema_name,\n"
                 + "    fk_tab.name as table_name,\n"
                 + "    '>- no FKs' foreign_keys\n"
@@ -248,12 +280,19 @@ public class GenerarReporte {
             informe = informe + "\nschema_name" + ": " + schema_name + " | " + "table_name" + ": " + table_name + "\t | " + "foreign_keys" + ": " + foreign_keys + "\n";
 
         }
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			informe = informe + "\nNo existen resultados";
+		}
         return informe;
     }
 
-    public String getTriggers(Connection conn, String informe) throws SQLException {
+    public String getTriggers(Connection conn, String informe) {
 
-        Statement statement = conn.createStatement();
+        Statement statement;
+		try {
+			statement = conn.createStatement();
+	
         String selectTablas = "select schema_name(tab.schema_id) + '.' + tab.name as [table],\n"
                 + "    trig.name as trigger_name,\n"
                 + "    case when is_instead_of_trigger = 1 then 'Instead of'\n"
@@ -295,6 +334,10 @@ public class GenerarReporte {
             informe = informe + "table" + ": " + table + " | " + "trigger_name" + ": " + trigger_name + "\t | " + "activation" + ": " + activation + "\t | " + "event" + ": " + event + "\t | " + "type" + ": " + type + "\t | " + "status" + ": " + status + "\t | " + "definition" + ": " + definition + "\n";
 
         }
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			informe = informe + "\nNo existen resultados";
+		}
         return informe;
     }
 
