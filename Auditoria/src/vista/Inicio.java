@@ -111,15 +111,20 @@ public class Inicio extends JFrame {
         String database = txtDatabase.getText();
         String user = txtUser.getText();
         String password = txtPassword.getText();
-        conexion = new ConexionBD(server, database, user, password);
-        conexion.obtener();
-         if(conexion!=null){
-            ResultadosAnalisis ra = new ResultadosAnalisis(conexion);
-            ra.setVisible(true);
-            this.dispose();
-        } else{
-            JOptionPane.showMessageDialog(null,"No se pudo conectar");
+        if(server != "" && database != "" && user != "" && password != "") {
+        	conexion = new ConexionBD(server, database, user, password);
+            conexion.obtener();
+             if(conexion!=null){
+                ResultadosAnalisis ra = new ResultadosAnalisis(conexion);
+                ra.setVisible(true);
+                this.dispose();
+            } else{
+                JOptionPane.showMessageDialog(null,"No se pudo conectar");
+            }
+        } else {
+        	JOptionPane.showMessageDialog(null,"Complete los campos");
         }
+        
     }                                           
 
     /**
