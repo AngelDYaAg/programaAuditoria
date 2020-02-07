@@ -13,12 +13,13 @@ import javax.swing.JOptionPane;
  * @author PAVILLION
  */
 public class Inicio extends javax.swing.JFrame {
-    ConexionBD conexion = new ConexionBD();
+    ConexionBD conexion;
     /**
      * Creates new form Inicio
      */
     public Inicio() {
         initComponents();
+        this.setLocationRelativeTo(null);
     }
 
     /**
@@ -62,11 +63,14 @@ public class Inicio extends javax.swing.JFrame {
 
         jLabel2.setText("Servidor");
         jPanel3.add(jLabel2);
+
+        txtServidor.setText("localhost");
         jPanel3.add(txtServidor);
 
         jLabel3.setText("Base de Datos");
         jPanel3.add(jLabel3);
 
+        txtDatabase.setText("pubs");
         txtDatabase.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 txtDatabaseActionPerformed(evt);
@@ -76,10 +80,14 @@ public class Inicio extends javax.swing.JFrame {
 
         jLabel4.setText("Usuario");
         jPanel3.add(jLabel4);
+
+        txtUser.setText("sa");
         jPanel3.add(txtUser);
 
         jLabel5.setText("Contraseña");
         jPanel3.add(jLabel5);
+
+        txtPassword.setText("P@ssw0rd");
         jPanel3.add(txtPassword);
 
         jPanel1.add(jPanel3);
@@ -110,13 +118,15 @@ public class Inicio extends javax.swing.JFrame {
         String database = txtDatabase.getText();
         String user = txtUser.getText();
         String password = txtPassword.getText();
-        conexion.obtener(server, database, user, password);
+        conexion = new ConexionBD(server, database, user, password);
+        conexion.obtener();
          if(conexion!=null){
-            JOptionPane.showMessageDialog(null,"Exito");
+            ResultadosAnalisis ra = new ResultadosAnalisis(conexion);
+            ra.setVisible(true);
+            this.dispose();
         } else{
             JOptionPane.showMessageDialog(null,"No se pudo conectar");
         }
-        conexion.cerrar();
     }//GEN-LAST:event_btnAnalisisActionPerformed
 
     /**
