@@ -33,7 +33,7 @@ public class LeerEscribirArchivos {
         try {
 //            FileOutputStream fos = new FileOutputStream("src/archivos/"+ nombreArchivo +".lista");
 //            ObjectOutputStream ous = new ObjectOutputStream(fos); windows(separador)
-            FileOutputStream fos = new FileOutputStream("C:" + File.separatorChar + nombreArchivo + ".txt");
+            FileOutputStream fos = new FileOutputStream("src" + File.separator + "archivos" + File.separatorChar + nombreArchivo + ".txt");
             //File.separator para cualquier sistema
             ObjectOutputStream ous = new ObjectOutputStream(fos);
             ous.writeUTF(lista);
