@@ -41,9 +41,17 @@ public class ConexionBD {
     }
 
     public Connection obtener() {
+    	String connectionUrl =
+                "jdbc:sqlserver://"+server+";"
+                + "database="+database+";"
+                + "user="+user+";"
+                + "password="+password+";";
+
         try {
-            String dbURL = "jdbc:sqlserver://" + server + ";databaseName=" + database;
-            cnx = DriverManager.getConnection(dbURL, user, password);
+        	Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
+        	cnx = DriverManager.getConnection(connectionUrl);
+            // String dbURL = "jdbc:sqlserver://" + server + ";databaseName=" + database;
+            // cnx = DriverManager.getConnection(dbURL, user, password);
             if (cnx != null) {
                 DatabaseMetaData dm = (DatabaseMetaData) cnx.getMetaData();
                 System.out.println("Driver name: " + dm.getDriverName());
@@ -52,7 +60,7 @@ public class ConexionBD {
                 System.out.println("Product version: " + dm.getDatabaseProductVersion());
             }
 
-        } catch (SQLException ex) {
+        } catch (SQLException | ClassNotFoundException ex) {
             ex.printStackTrace();
         }
         return cnx;
