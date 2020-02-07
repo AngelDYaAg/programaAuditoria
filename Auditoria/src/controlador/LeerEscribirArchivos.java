@@ -23,7 +23,7 @@ public class LeerEscribirArchivos {
 
     public void crearArchivo(String nombreArchivo) {
         try {
-            FileOutputStream fos = new FileOutputStream("src" + File.separator + "archivos" + File.separatorChar + nombreArchivo + ".txt");
+            FileOutputStream fos = new FileOutputStream("C:" + File.separatorChar + nombreArchivo + ".txt");
         } catch (FileNotFoundException ex) {
             Logger.getLogger(LeerEscribirArchivos.class.getName()).log(Level.SEVERE, null, ex);
         }
