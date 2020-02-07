@@ -45,11 +45,11 @@ public class GenerarReporte {
             informe = getNoFKs(cnx, informe);
             informe = informe + "\n***************************Triggers:*************************************************\n";
             informe = getTriggers(cnx, informe);
+            informe = informe + "\n***************************Constraints:*************************************************";
+            informe = getConstraints(cnx, informe);
             lea.escribirArchivo(informe, nombreArchivo);
-           // System.out.println("\n***************************Constraints:*************************************************");
-           // getConstraints(cnx);
            return true;
-        } catch (SQLException ex) {
+        } catch (Error | SQLException ex) {
             System.err.println("Error al generar reporte");
             return false;
         }
@@ -196,22 +196,31 @@ public class GenerarReporte {
         return informe;
     }
 
-    public String getConstraints(Connection conn, String informe) throws SQLException {
+    public String getConstraints(Connection conn, String informe) {
 
-        Statement statement = conn.createStatement();
+        Statement statement;
+		try {
+			statement = conn.createStatement();
+		
         String selectTablas = "DBCC CHECKCONSTRAINTS WITH ALL_CONSTRAINTS";
         ResultSet resultSet = statement.executeQuery(selectTablas);
         String Table;
         String Constraint;
         String Where;
 
-        while (resultSet.next()) {
-            Table = resultSet.getString("Table");
-            Constraint = resultSet.getString("Constraint");
-            Where = resultSet.getString("Where");
-            informe = informe + "\nTable" + ": " + Table + " | " + "Constraint" + ": " + Constraint + "\t | " + "Where" + ": " + Where + "\n";
+        	while (resultSet.next()) {
+                Table = resultSet.getString("Table");
+                Constraint = resultSet.getString("Constraint");
+                Where = resultSet.getString("Where");
+                informe = informe + "\nTable" + ": " + Table + " | " + "Constraint" + ": " + Constraint + "\t | " + "Where" + ": " + Where + "\n";
 
-        }
+            }
+      
+        
+		} catch (SQLException e) {
+			informe = informe + "\nNo existen resulados";
+		}
+        
         return informe;
     }
 

@@ -221,19 +221,17 @@ public class ConexionBD {
             Statement statement = conn.createStatement();
             String selectTablas = "DBCC CHECKCONSTRAINTS WITH ALL_CONSTRAINTS";
             ResultSet resultSet = statement.executeQuery(selectTablas);
-            String Table;
-            String Constraint;
-            String Where;
             
+            String row[] = new String[3];
             while (resultSet.next()) {
-                Table = resultSet.getString("Table");
-                Constraint = resultSet.getString("Constraint");
-                Where = resultSet.getString("Where");
-                System.out.println("Table" + ": " + Table + " | " + "Constraint" + ": " + Constraint + "\t | " + "Where" + ": " + Where);
-                
+                for (int i = 0; i < 3; i++) {
+                    row[i] = resultSet.getString(i + 1);
+                }
+                modelo.addRow(row);
             }
         } catch (SQLException ex) {
             System.err.println("Error al traer datos de constrains");
+            return modelo;
         }
         return modelo;
     }

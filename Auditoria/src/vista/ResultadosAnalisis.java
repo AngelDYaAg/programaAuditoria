@@ -29,6 +29,7 @@ public class ResultadosAnalisis extends JFrame {
         resultadoNoFKTablasBD();
         // TRIGGERS
         resultadoTriggersBD();
+        // CONSTRAIN
     }
 
     void resultadoTablasBD() {
@@ -123,12 +124,14 @@ public class ResultadosAnalisis extends JFrame {
     // CHECK
     void resultadoCheckBD() {
         DefaultTableModel modelo = new DefaultTableModel();
-        modelo.addColumn("");
-        tbTriggers.setModel(modelo);
+        modelo.addColumn("Table");
+        modelo.addColumn("Constrain");
+        modelo.addColumn("Where");
+        tbRestricciones.setModel(modelo);
+        
+        modelo = conexion.getConstraints(conexion.getCnx(), modelo);
 
-        modelo = conexion.getTriggers(conexion.getCnx(), modelo);
-
-        tbTriggers.setModel(modelo);
+        tbRestricciones.setModel(modelo);
     }
 
     
